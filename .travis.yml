@@ -1,0 +1,23 @@
+language: node_js
+node_js:
+  - '6'
+  - '5'
+  - '4'
+  - '0.12'
+  - '0.10'
+after_success: 'npm run coveralls'
+deploy:
+  provider: npm
+  email: bargenson@gmail.com
+  api_key:
+    secure: VTrqcB3d0y7jQWb3JuLO2TZTczArGnkOzJsik0vBVv17VB/nZyNkPlGfv1zdIIe5x3hMRwP2V/ual+MMEldLhMnGPI8359XYx6D/NAv+P8MmjwbsVbwo8hRG0ctXlDzHI9ni07zh6UaGsh/XiMEtm1sp1ZSzv8LMjNRetOEvP67SicqGvxD2mZHur30s8Fn0qTleamJddYVluJpvsCLYetobeGEghq+aS3l5A1zbnNDHsV54doyfBRjxMO05Awc8md84i4pZTbAGYFpGRxxkmCW6cyUzgWQnIlKUWSypDslwNRJOCzVIZwaXj8uyrnXCk/Bp0eZiooU5CiMjbLMoF2QMxd94vDyIxju/pYnq+yhMsTTdEHm2ZPZCJxdyMbqc0HscvouPi2va6MYXq3XRtR80kDvlAIWYWMJ8pPuSnlSRFUrk5AtQ6MygJeJxyANc+b45uyHQ1PtfBZd3TLm+PNhEZVFEoe2CAvK6IVaNoac7rMLurM/g/vtjrwbCDFBXvMMEUKuhpiVTyuig0V8lRN8IyEhytFnbMmsdFj0D+/B479fpZYOUAq2lXoJ9CxVn/qaZDYTx8DD7e/mP1xm9xJRcwCPB+RuQqDPkqGdRjXcVhkxzVSCQUHR9fOg2LyI1WHOVoc1gfaYt2kSJZ5seKmvATrp5u++yKPIdvkAR1AU=
+  on:
+    tags: true
+    repo: barracksiot/messenger-client
+
+notifications:
+  slack: 
+    rooms:
+      secure: "ctLNliKum/SL5FhQ5PvrNkf67/fq6f6ud0V7XyZLBw5JHhn+ro8FoTY+IhZz3qh6F0AqcO0xItzBFEsY66D6gd3x+1QzYgdPvBkB42MDmE6abFrLy8LBrRpin1UEm1rtw9gQenwm+xMi8eGzytX8cSoZWR689h5mcYoN6tpWh8rxYny2XuY8BOHbLuTOJbbHpvDkAJqaZTgfhxlwhfIMKrCVvmenrvBRXuNP/mq/xxYo2Go2+H72d2IKOd1gOv7GsALhLOd3UAbhXeoK3pOUxw4jQCMYR7PjlT+LXjt4MVqElce998tbf+FAPTw9QVJc6y9jLXcto5jRBpeEdx/Wey457lBemaga375rzz3EM0gvSjwB+EhHZlq9nlhXB4iUVrZ3TiMRX6ZG6o3JoZXh7CTq2z8Mc9e0GqQ7/V21jHIuMxeUtCCTAjlRH+/5tlkwPGpEQ73UYDGdK2qjc9AWgkZZ08/ur5oEY4Mw6p5B2GcxPobgfVH/bp8ldhBrBJM0A4er7hIXimckRORvFZNg+jRTCNQYPLpyRSaIiJWGfGXaiitcaYO8z9lv835QpDbSxM3rEbGZOh+cDOHaoK7TUnw9kvai3mkgT6xkyKfj4ewC/3r0TpMvHlYpI3eRr0vkVkTLLGZedB7jOuYve31cHFDrlNSEDSw+Xwkcj1ukS8w="
+    on_success: change
+    on_failure: always
