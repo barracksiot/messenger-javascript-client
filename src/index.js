@@ -1,10 +1,5 @@
 'use strict';
 
-// var ERRORS to be declared
-var ERROR_REQUEST_FAILED              = 'REQUEST_FAILED';
-var ERROR_UNEXPECTED_SERVER_RESPONSE  = 'UNEXPECTED_SERVER_RESPONSE';
-var ERROR_MISSING_MANDATORY_ARGUMENT  = 'MISSING_MANDATORY_ARGUMENT';
-
 var DEFAULT_BARRACKS_BASE_URL         = 'https://app.barracks.io';
 var DEFAULT_BARRACKS_MQTT_ENDPOINT    = 'mqtt://app.barracks.io';
 
@@ -12,10 +7,9 @@ require('es6-promise').polyfill();
 var fs = require('fs');
 var request = require('request');
 var mqtt = require('mqtt');
+var MqttWrapper = require('../src/mqtt_wrapper');
 var uuid = require('uuid/v1');
 
-
-// package.json is empty for now
 function Barracks(options) {
   this.options = {
     baseURL: options.baseURL || DEFAULT_BARRACKS_BASE_URL,
@@ -35,22 +29,28 @@ Barracks.prototype.listenMessages = function (apiKey, unitId, timeout) {
       clean: false
     });
 
-    client.on('connect', function() {
+    /*client.on('connect', function() {
+      console.log('------------------------------------------------------');
       console.log('Connected to ' + mqttEndpoint);
-      client.subscribe(apiKey + '.' + unitId, { qos: 2 });
+      //client.subscribe(apiKey + '.' + unitId, { qos: 2});
+    });*/
+
+    MqttWrapper.on(client, 'connect', function() {
+      console.log('Connected to ' + mqttEndpoint);
+      //client.subscribe(apiKey + '.' + unitId, { qos: 2 });
     });
 
-    client.on('message', function(topic, message, packet) {
+    MqttWrapper.on(client, 'message', function(topic, message, packet) {
       console.log('Received: ' + message.toString() + ' [retain=' + packet.retain + ']');
     });
 
-    client.on('error', function(error) {
+    MqttWrapper.on(client, 'error', function(error) {
       console.log(error);
       client.end();
       reject('Connection error:' + error);
     });
 
-    client.on('close', function() {
+    MqttWrapper.on(client, 'close', function() {
       console.log('Connection closed');
       resolve();
     });

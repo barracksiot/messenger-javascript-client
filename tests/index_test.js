@@ -5,7 +5,9 @@ var sinon = require('sinon');
 var sinonChai = require('sinon-chai');
 var chai = require('chai');
 var expect = chai.expect;
-var proxyquire =  require('proxyquire');
+var proxyquire = require('proxyquire').noCallThru();
+var Connection = require('mqtt-connection');
+var Stream = require('stream');
 
 chai.use(sinonChai);
 
@@ -93,10 +95,99 @@ describe('Constructor : ', function () {
   });
 });
 
-describe('listenMessages(apiKey, unitId, timeout)', function() {
+describe('listenMessages', function() {
 
   var barracks;
-  beforeEach({});
+  var spyOnConnect;
+  var spyOnError;
+  var spyOnClose;
+  var spyOnMessage;
+  var mockStream = new Stream();
+  var connection = new Connection(mockStream);
+  var Mqtt = require('mqtt');
+  Mqtt.connect = sinon.stub().returns(connection);
 
-  it('should work perfectly fine') ;
+  before( function() {
+    connection.on('connect', function() {
+      spyOnConnect();
+    });
+    connection.on('error', function(error) {
+      spyOnError(error);
+    });
+    connection.on('close', function() {
+      spyOnClose();
+    });
+    connection.on('message', function(topic, message, packet) {
+      spyOnMessage(topic, message, packet);
+    });
+
+    var Barracks = proxyquire('../src/index.js', {
+      'mqtt-connection': connection
+    });
+
+    barracks = new Barracks({
+      apiKey: 'abc',
+      unitId: 'efg'
+    });
+  });
+
+  it('should log message when message is received', function(done) {
+    // Given
+    spyOnMessage = sinon.spy();
+    spyOnConnect = sinon.spy();
+    spyOnClose = sinon.spy();
+    var message = 'Un joli message';
+    setTimeout(function() {
+      connection.emit('connect');
+      connection.emit('message', 'topic', message, 'packet');
+      connection.emit('close');
+    }, 500);
+
+    // When / Then
+    barracks.listenMessages('zer', 'zefd', 500).then(function() {
+      expect(spyOnMessage).to.have.been.calledOnce;
+      done();
+    }).catch(function(err) {
+      done(err);
+    });
+  });
+  it('should connect properly', function(done) {
+    // Given
+    spyOnConnect = sinon.spy();
+    spyOnClose = sinon.spy();
+    setTimeout(function() {
+      connection.emit('connect');
+      connection.emit('close');
+    }, 500);
+
+    // When / Then
+    barracks.listenMessages('abc', 'njk', 500).then(function() {
+      expect(spyOnClose).to.have.been.calledOnce;
+      expect(spyOnClose).to.have.been.calledWithExactly();
+      done();
+    }).catch(function(err) {
+      done(err);
+    });
+  });
+
+  it('should reject error when connection fails', function(done) {
+    // Given
+    const error = 'This is an error';
+    spyOnError = sinon.spy();
+    spyOnConnect = sinon.spy();
+    setTimeout(function() {
+      connection.emit('connect');
+      connection.emit('error', error);
+    }, 500);
+
+    // When / Then
+    barracks.listenMessages('abc', 'efg', 500).then(function() {
+      done('Should have failed');
+    }).catch(function(err) {
+      expect(err).to.be.equals('Connection error:' + error);
+      expect(spyOnError).to.have.been.calledOnce;
+      expect(spyOnError).to.have.been.calledWithExactly(error);
+      done();
+    });
+  });
 });
