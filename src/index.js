@@ -1,20 +1,18 @@
 'use strict';
 
 // var ERRORS to be declared
-const ERROR_REQUEST_FAILED              = 'REQUEST_FAILED';
-const ERROR_UNEXPECTED_SERVER_RESPONSE  = 'UNEXPECTED_SERVER_RESPONSE';
-const ERROR_MISSING_MANDATORY_ARGUMENT  = 'MISSING_MANDATORY_ARGUMENT';
+var ERROR_REQUEST_FAILED              = 'REQUEST_FAILED';
+var ERROR_UNEXPECTED_SERVER_RESPONSE  = 'UNEXPECTED_SERVER_RESPONSE';
+var ERROR_MISSING_MANDATORY_ARGUMENT  = 'MISSING_MANDATORY_ARGUMENT';
 
-const DEFAULT_BARRACKS_BASE_URL         = 'https://app.barracks.io';
-const DEFAULT_BARRACKS_MQTT_ENDPOINT    = 'mqtt://app.barracks.io';
+var DEFAULT_BARRACKS_BASE_URL         = 'https://app.barracks.io';
+var DEFAULT_BARRACKS_MQTT_ENDPOINT    = 'mqtt://app.barracks.io';
 
 require('es6-promise').polyfill();
-const responseBuilder = require('./responseBuilder');
-const fs = require('fs');
-const request = require('request');
-const fileHelper = require('./fileHelper');
-const mqtt = require('mqtt');
-//const uuid = require('uuid/v1');
+var fs = require('fs');
+var request = require('request');
+var mqtt = require('mqtt');
+var uuid = require('uuid/v1');
 
 
 // package.json is empty for now
@@ -30,30 +28,30 @@ function Barracks(options) {
 }
 
 Barracks.prototype.listenMessages = function (apiKey, unitId, timeout) {
-  return new Promise((resolve, reject) => {
-    const mqttEndpoint = DEFAULT_BARRACKS_MQTT_ENDPOINT;
-    const client = mqtt.connect(mqttEndpoint, {
-      clientId: `${apiKey}.${unitId}`,
+  return new Promise(function (resolve, reject){
+    var mqttEndpoint = DEFAULT_BARRACKS_MQTT_ENDPOINT;
+    var client = mqtt.connect(mqttEndpoint, {
+      clientId: apiKey + '.' + unitId,
       clean: false
     });
 
-    client.on('connect', () => {
+    client.on('connect', function() {
       console.log('Connected to ' + mqttEndpoint);
-      client.subscribe(`${apiKey}.${unitId}`, { qos: 2 });
+      client.subscribe(apiKey + '.' + unitId, { qos: 2 });
     });
 
-    client.on('message', (topic, message, packet) => {
+    client.on('message', function(topic, message, packet) {
       console.log('Received: ' + message.toString() + ' [retain=' + packet.retain + ']');
     });
 
-    client.on('error', (error) => {
-      logger.error(error);
+    client.on('error', function(error) {
+      console.log(error);
       client.end();
       reject('Connection error:' + error);
     });
 
-    client.on('close', () => {
-      logger.debug('Connection closed');
+    client.on('close', function() {
+      console.log('Connection closed');
       resolve();
     });
 
