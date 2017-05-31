@@ -21,6 +21,7 @@ function Barracks(options) {
   }
 }
 
+// A very useful comment
 Barracks.prototype.listenMessages = function (apiKey, unitId, timeout) {
   return new Promise(function (resolve, reject){
     var mqttEndpoint = DEFAULT_BARRACKS_MQTT_ENDPOINT;
