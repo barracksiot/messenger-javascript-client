@@ -98,6 +98,7 @@ describe('Constructor : ', function () {
 describe('listenMessages', function() {
 
   var barracks;
+  var Barracks;
   var spyOnConnect;
   var spyOnError;
   var spyOnClose;
@@ -107,7 +108,11 @@ describe('listenMessages', function() {
   var Mqtt = require('mqtt');
   Mqtt.connect = sinon.stub().returns(connection);
 
-  before( function() {
+  beforeEach( function() {
+    mockStream = new Stream();
+    connection = new Connection(mockStream);
+    Mqtt = require('mqtt');
+    Mqtt.connect = sinon.stub().returns(connection);
     connection.on('connect', function() {
       spyOnConnect();
     });
@@ -121,7 +126,7 @@ describe('listenMessages', function() {
       spyOnMessage(topic, message, packet);
     });
 
-    var Barracks = proxyquire('../src/index.js', {
+    Barracks = proxyquire('../src/index.js', {
       'mqtt-connection': connection
     });
 
@@ -144,7 +149,7 @@ describe('listenMessages', function() {
     }, 500);
 
     // When / Then
-    barracks.listenMessages('zer', 'zefd', 500).then(function() {
+    barracks.listenMessages('zer', 'zefd', 500).then(function(result) {
       expect(spyOnMessage).to.have.been.calledOnce;
       done();
     }).catch(function(err) {
@@ -161,7 +166,7 @@ describe('listenMessages', function() {
     }, 500);
 
     // When / Then
-    barracks.listenMessages('abc', 'njk', 500).then(function() {
+    barracks.listenMessages('abc', 'njk', 500).then(function(result) {
       expect(spyOnClose).to.have.been.calledOnce;
       expect(spyOnClose).to.have.been.calledWithExactly();
       done();
@@ -174,14 +179,12 @@ describe('listenMessages', function() {
     // Given
     const error = 'This is an error';
     spyOnError = sinon.spy();
-    spyOnConnect = sinon.spy();
     setTimeout(function() {
-      connection.emit('connect');
       connection.emit('error', error);
     }, 500);
 
     // When / Then
-    barracks.listenMessages('abc', 'efg', 500).then(function() {
+    barracks.listenMessages('abc', 'efg', 500).then(function(result) {
       done('Should have failed');
     }).catch(function(err) {
       expect(err).to.be.equals('Connection error:' + error);

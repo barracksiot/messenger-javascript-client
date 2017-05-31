@@ -29,12 +29,6 @@ Barracks.prototype.listenMessages = function (apiKey, unitId, timeout) {
       clean: false
     });
 
-    /*client.on('connect', function() {
-      console.log('------------------------------------------------------');
-      console.log('Connected to ' + mqttEndpoint);
-      //client.subscribe(apiKey + '.' + unitId, { qos: 2});
-    });*/
-
     MqttWrapper.on(client, 'connect', function() {
       console.log('Connected to ' + mqttEndpoint);
       //client.subscribe(apiKey + '.' + unitId, { qos: 2 });
