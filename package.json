@@ -1,8 +1,8 @@
 {
-  "name": "barracks-messenger-sdk",
-  "version": "2.0.2",
+  "name": "barracks-messenger-sdk-betatest",
+  "version": "0.0.1",
   "build": 0,
-  "description": "Barracks SDK node module",
+  "description": "Barracks messaging SDK node module",
   "main": "src/index.js",
   "scripts": {
     "lint": "jshint **/**.js",
@@ -31,6 +31,10 @@
     {
       "email": "simon@barracks.io",
       "name": "Simon Guerout"
+    },
+    {
+      "email": "vladimir@barracks.io",
+      "name": "Vladimir Romero"
     }
   ],
   "license": "Apache-2.0",
