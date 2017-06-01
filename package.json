@@ -1,6 +1,6 @@
 {
   "name": "barracks-messenger-sdk-betatest",
-  "version": "0.0.1",
+  "version": "0.0.15",
   "build": 0,
   "description": "Barracks messaging SDK node module",
   "main": "src/index.js",
@@ -70,6 +70,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/barracksiot/javascript-client"
+    "url": "https://github.com/barracksiot/messenger-javascript-client"
   }
 }

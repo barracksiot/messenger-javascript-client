@@ -24,7 +24,7 @@ function Barracks(options) {
 // A very useful comment
 Barracks.prototype.listenMessages = function (apiKey, unitId, timeout) {
   return new Promise(function (resolve, reject){
-    var mqttEndpoint = DEFAULT_BARRACKS_MQTT_ENDPOINT;
+    var mqttEndpoint = 'mqtt://192.168.99.100';
     var client = mqtt.connect(mqttEndpoint, {
       clientId: apiKey + '.' + unitId,
       clean: false
@@ -32,7 +32,8 @@ Barracks.prototype.listenMessages = function (apiKey, unitId, timeout) {
 
     MqttWrapper.on(client, 'connect', function() {
       console.log('Connected to ' + mqttEndpoint);
-      //client.subscribe(apiKey + '.' + unitId, { qos: 2 });
+      client.subscribe(apiKey + '.' + unitId, { qos: 1 });
+      console.log('subscribed to ' + apiKey + '.' + unitId );
     });
 
     MqttWrapper.on(client, 'message', function(topic, message, packet) {
@@ -50,12 +51,12 @@ Barracks.prototype.listenMessages = function (apiKey, unitId, timeout) {
       resolve();
     });
 
-    if (timeout) {
+   /* if (timeout) {
       setTimeout(function () {
         client.end();
         resolve();
       }, timeout);
-    }
+    }*/
   });
 };
 
