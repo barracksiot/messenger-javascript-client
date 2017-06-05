@@ -7,57 +7,50 @@ require('es6-promise').polyfill();
 var fs = require('fs');
 var request = require('request');
 var mqtt = require('mqtt');
-var MqttWrapper = require('../src/mqtt_wrapper');
 var uuid = require('uuid/v1');
+var client;
 
-function Barracks(options) {
+function BarracksMessenger(options) {
   this.options = {
     baseURL: options.baseURL || DEFAULT_BARRACKS_BASE_URL,
+    mqttEndpoint: options.mqttEndpoint || DEFAULT_BARRACKS_MQTT_ENDPOINT,
+    unitId: options.unitId,
     apiKey: options.apiKey
   };
-
-  if (options.allowSelfSigned && options.allowSelfSigned === true) {
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-  }
 }
 
-// A very useful comment
-Barracks.prototype.listenMessages = function (apiKey, unitId, timeout) {
-  return new Promise(function (resolve, reject){
-    var mqttEndpoint = 'mqtt://192.168.99.100';
-    var client = mqtt.connect(mqttEndpoint, {
-      clientId: apiKey + '.' + unitId,
-      clean: false
-    });
+function Message(payload, retained, topic, length, qos) {
+  this.payload = payload;
+  this.retained = retained;
+  this.topic = topic;
+  this.length = length;
+  this.qos = qos;
+};
 
-    MqttWrapper.on(client, 'connect', function() {
-      console.log('Connected to ' + mqttEndpoint);
-      client.subscribe(apiKey + '.' + unitId, { qos: 1 });
-      console.log('subscribed to ' + apiKey + '.' + unitId );
-    });
+BarracksMessenger.prototype.connect = function(options) {
+  client = mqtt.connect(this.options.mqttEndpoint, {
+    clientId: this.options.apiKey + '.' + this.options.unitId,
+    clean: false
+  });
 
-    MqttWrapper.on(client, 'message', function(topic, message, packet) {
-      console.log('Received: ' + message.toString() + ' [retain=' + packet.retain + ']');
-    });
+  client.on('connect', options.onConnect);
+  client.on('error', options.onError);
+  client.on('close', options.onClose);
+  client.on('reconnect', options.onReconnect);
+};
 
-    MqttWrapper.on(client, 'error', function(error) {
-      console.log(error);
-      client.end();
-      reject('Connection error:' + error);
-    });
-
-    MqttWrapper.on(client, 'close', function() {
-      console.log('Connection closed');
-      resolve();
-    });
-
-   /* if (timeout) {
-      setTimeout(function () {
-        client.end();
-        resolve();
-      }, timeout);
-    }*/
+BarracksMessenger.prototype.subscribe = function(topic, callback, options) {
+  client.subscribe(this.options.apiKey + '.' + this.options.unitId, { qos: options.qos });
+  client.on('message', function(topic, message, packet) {
+    var messageReceived = new Message(message.toString(), packet.retain, packet.topic, packet.length, packet.qos);
+    callback(messageReceived);
   });
 };
 
-module.exports = Barracks;
+BarracksMessenger.prototype.end = function() {
+  client.end();
+  console.log('Disconnected from server');
+};
+
+module.exports.BarracksMessenger = BarracksMessenger;
+module.exports.Message = Message;

@@ -1,5 +1,6 @@
 /* jshint expr: true, maxstatements: 100 */
 /* global describe, it, beforeEach */
+'use strict';
 
 var sinon = require('sinon');
 var sinonChai = require('sinon-chai');
@@ -8,189 +9,307 @@ var expect = chai.expect;
 var proxyquire = require('proxyquire').noCallThru();
 var Connection = require('mqtt-connection');
 var Stream = require('stream');
+var BarracksMessenger = require('../src/index.js').BarracksMessenger;
+var Message = require('../src/index.js').Message;
 
 chai.use(sinonChai);
 
 var UNIT_ID = 'unit1';
 var API_KEY = 'validKey';
-var CUSTOM_CLIENT_DATA = {
-  aKey: 'aValue',
-  anotherKey: true
-};
 
 describe('Constructor : ', function () {
 
-  var Barracks = require('../src/index.js');
-
   beforeEach(function() {
-    Barracks = require('../src/index.js');
+    BarracksMessenger = require('../src/index.js').BarracksMessenger;
   });
 
-  function validateBarracksObject(barracks, expectedBaseUrl) {
-    expect(barracks).to.be.an('object');
-    expect(barracks.options).to.be.an('object');
-    expect(barracks.listenMessages).to.be.a('function');
-    expect(barracks.options).to.deep.equals({
-      apiKey: API_KEY,
-      baseURL: expectedBaseUrl
+  function validateBarracksMessengerObject(barracksMessenger, expectedBaseUrl, expectedMqttEndpoint) {
+    expect(barracksMessenger).to.be.an('object');
+    expect(barracksMessenger.options).to.be.an('object');
+    expect(barracksMessenger.connect).to.be.a('function');
+    expect(barracksMessenger.subscribe).to.be.a('function');
+    expect(barracksMessenger.end).to.be.a('function');
+
+    expect(barracksMessenger.options).to.deep.equals({
+      baseURL: expectedBaseUrl,
+      mqttEndpoint: expectedMqttEndpoint,
+      unitId: UNIT_ID,
+      apiKey: API_KEY
     });
   }
 
-  it('Should return the Barracks object with default values when minimum options given', function() {
+  it('Should return the BarracksMessenger object with default values when minimum options given', function() {
     // Given
     var options = {
-      apiKey: API_KEY
+      apiKey: API_KEY,
+      unitId: UNIT_ID
     };
 
     // When
-    var barracks = new Barracks(options);
+    var barracksMessenger = new BarracksMessenger(options);
 
     // Then
-    validateBarracksObject(barracks, 'https://app.barracks.io');
+    validateBarracksMessengerObject(barracksMessenger, 'https://app.barracks.io', 'mqtt://app.barracks.io');
   });
 
-  it('Should return the Barracks object with baseUrl overriden when url option given', function() {
+  it('Should return the BarracksMessenger object with baseUrl overriden when url option given', function() {
     // Given
     var url = 'not.barracks.io';
     var options = {
       apiKey: API_KEY,
+      unitId: UNIT_ID,
       baseURL: url
     };
 
     // When
-    var barracks = new Barracks(options);
+    var barracksMessenger = new BarracksMessenger(options);
 
     // Then
-    validateBarracksObject(barracks, url);
+    validateBarracksMessengerObject(barracksMessenger, url, 'mqtt://app.barracks.io');
   });
 
-  it('Should return the Barracks object that do not accept self signed cert when option given with invalid value', function() {
+  it('Should return the BarracksMessenger object with mqttEndpoint overriden when mqtt option given', function() {
     // Given
+    var mqttEndpoint = 'mqtt://not.barracks.io';
     var options = {
       apiKey: API_KEY,
-      allowSelfSigned: 'plop'
+      unitId: UNIT_ID,
+      mqttEndpoint: mqttEndpoint
     };
 
     // When
-    var barracks = new Barracks(options);
+    var barracksMessenger = new BarracksMessenger(options);
 
     // Then
-    validateBarracksObject(barracks, 'https://app.barracks.io');
-    expect(process.env.NODE_TLS_REJECT_UNAUTHORIZED).to.be.equals(undefined);
-  });
-
-  it('Should return the Barracks object that accepts self signed cert when option given', function() {
-    // Given
-    var options = {
-      apiKey: API_KEY,
-      allowSelfSigned: true
-    };
-
-    // When
-    var barracks = new Barracks(options);
-
-    // Then
-    validateBarracksObject(barracks, 'https://app.barracks.io');
-    expect(process.env.NODE_TLS_REJECT_UNAUTHORIZED).to.be.equals('0');
+    validateBarracksMessengerObject(barracksMessenger, 'https://app.barracks.io', mqttEndpoint);
   });
 });
 
-describe('listenMessages', function() {
+describe('connect', function() {
 
-  var barracks;
-  var Barracks;
+  var barracksMessenger;
+  var BarracksMessenger;
   var spyOnConnect;
   var spyOnError;
   var spyOnClose;
-  var spyOnMessage;
+  var spyOnReconnect;
   var mockStream = new Stream();
   var connection = new Connection(mockStream);
   var Mqtt = require('mqtt');
   Mqtt.connect = sinon.stub().returns(connection);
 
-  beforeEach( function() {
+  beforeEach(function() {
     mockStream = new Stream();
     connection = new Connection(mockStream);
     Mqtt = require('mqtt');
     Mqtt.connect = sinon.stub().returns(connection);
-    connection.on('connect', function() {
-      spyOnConnect();
-    });
-    connection.on('error', function(error) {
-      spyOnError(error);
-    });
-    connection.on('close', function() {
-      spyOnClose();
-    });
-    connection.on('message', function(topic, message, packet) {
-      spyOnMessage(topic, message, packet);
-    });
 
-    Barracks = proxyquire('../src/index.js', {
+    BarracksMessenger = proxyquire('../src/index.js', {
       'mqtt-connection': connection
     });
 
-    barracks = new Barracks({
-      apiKey: 'abc',
-      unitId: 'efg'
+    barracksMessenger = new BarracksMessenger.BarracksMessenger({
+      apiKey: 'apiKey',
+      unitId: 'unitId'
     });
   });
 
-  /*it('should log message when message is received', function(done) {
-    // Given
-    spyOnMessage = sinon.spy();
-    spyOnConnect = sinon.spy();
-    spyOnClose = sinon.spy();
-    var message = 'Un joli message';
-    setTimeout(function() {
-      connection.emit('connect');
-      connection.emit('message', 'topic', message, 'packet');
-      connection.emit('close');
-    }, 500);
-
-    // When / Then
-    barracks.listenMessages('zer', 'zefd', 500).then(function(result) {
-      expect(spyOnMessage).to.have.been.calledOnce;
-      done();
-    }).catch(function(err) {
-      done(err);
-    });
-  });
-  it('should connect properly', function(done) {
+  it('should connect and close connection properly', function(done) {
     // Given
     spyOnConnect = sinon.spy();
     spyOnClose = sinon.spy();
+
     setTimeout(function() {
       connection.emit('connect');
+    }, 50);
+    setTimeout(function() {
       connection.emit('close');
-    }, 500);
-
-    // When / Then
-    barracks.listenMessages('abc', 'njk', 500).then(function(result) {
+      expect(spyOnConnect).to.have.been.calledOnce;
+      expect(spyOnConnect).to.have.been.calledWithExactly();
       expect(spyOnClose).to.have.been.calledOnce;
       expect(spyOnClose).to.have.been.calledWithExactly();
       done();
-    }).catch(function(err) {
-      done(err);
-    });
-  });*/
+    }, 150);
 
-  it('should reject error when connection fails', function(done) {
-    // Given
-    const error = 'This is an error';
-    spyOnError = sinon.spy();
-    setTimeout(function() {
-      connection.emit('error', error);
-    }, 500);
+    var apiKey = 'apiKey';
+    var unitId = 'unitId';
 
     // When / Then
-    barracks.listenMessages('abc', 'efg', 500).then(function(result) {
-      done('Should have failed');
-    }).catch(function(err) {
-      expect(err).to.be.equals('Connection error:' + error);
+    barracksMessenger.connect({
+      onConnect: spyOnConnect,
+      onError: function() {},
+      onClose: spyOnClose,
+      onReconnect: function() {}
+    });
+  });
+
+  it('should go into error code if error triggered', function(done) {
+    // Given
+    spyOnError = sinon.spy();
+    var error = 'an error';
+    setTimeout(function() {
+      connection.emit('error', error);
       expect(spyOnError).to.have.been.calledOnce;
       expect(spyOnError).to.have.been.calledWithExactly(error);
       done();
+    }, 50);
+
+    var apiKey = 'apiKey';
+    var unitId = 'unitId';
+
+    // When / Then
+    barracksMessenger.connect({
+      onConnect: function() {},
+      onError: spyOnError,
+      onClose: function() {},
+      onReconnect: function() {}
+    });
+  });
+
+  it('should attempt to reconnect if reconnect event triggered', function(done) {
+    // Given
+    spyOnReconnect = sinon.spy();
+    var error = 'an error';
+    setTimeout(function() {
+      connection.emit('reconnect');
+      expect(spyOnReconnect).to.have.been.calledOnce;
+      expect(spyOnReconnect).to.have.been.calledWithExactly();
+      done();
+    }, 50);
+
+    var apiKey = 'apiKey';
+    var unitId = 'unitId';
+
+    // When / Then
+    barracksMessenger.connect({
+      onConnect: function() {},
+      onError: function() {},
+      onClose: function() {},
+      onReconnect: spyOnReconnect
     });
   });
 });
+
+describe('subscribe', function() {
+  var barracksMessenger;
+  var BarracksMessenger;
+  var spyOnConnect;
+  var spyOnError;
+  var spyOnClose;
+  var spyOnReconnect;
+  var spyOnSubscribe;
+  var spyOnMessage;
+  var mockStream = new Stream();
+  var connection = new Connection(mockStream);
+  var Mqtt = require('mqtt');
+  var Packet = require('mqtt-packet');
+  Mqtt.connect = sinon.stub().returns(connection);
+
+  beforeEach(function() {
+    mockStream = new Stream();
+    connection = new Connection(mockStream);
+    Mqtt = require('mqtt');
+    Mqtt.connect = sinon.stub().returns(connection);
+
+    BarracksMessenger = proxyquire('../src/index.js', {
+      'mqtt-connection': connection
+    });
+
+    barracksMessenger = new BarracksMessenger.BarracksMessenger({
+      apiKey: 'apiKey',
+      unitId: 'unitId'
+    });
+  });
+
+  it('should subscribe to the topic and call the provided function', function(done) {
+    // Given
+    spyOnSubscribe = sinon.spy();
+    spyOnConnect = sinon.spy();
+    spyOnMessage = sinon.spy();
+    spyOnError = sinon.spy();
+    spyOnReconnect = sinon.spy();
+    spyOnClose = sinon.spy();
+    var topic = barracksMessenger.options.apiKey + '.' + barracksMessenger.options.unitId;
+    var message = 'Salut';
+    var object = {
+      cmd: 'publish',
+      messageId: 1,
+      retain: false,
+      qos: 1,
+      dup: false,
+      length: 10,
+      topic: topic,
+      payload: message
+    };
+
+    var packet = Packet.generate(object);
+    var messageReceived = new Message(message.toString(), packet.retain, packet.topic, packet.length, packet.qos);
+
+    setTimeout(function() {
+      connection.emit('connect');
+    }, 50);
+
+    setTimeout(function() {
+      connection.emit('message', topic, message, packet);
+      expect(spyOnSubscribe).to.have.been.calledOnce;
+      expect(spyOnSubscribe).to.have.been.calledWithExactly(messageReceived);
+      expect(spyOnConnect).to.have.been.calledOnce;
+      done();
+    }, 100);
+
+    connection.subscribe = sinon.stub().returns(true);
+
+    // When / Then
+    barracksMessenger.connect({
+      onConnect: spyOnConnect,
+      onError: spyOnError,
+      onClose: spyOnClose,
+      onReconnect: spyOnReconnect
+    });
+
+    barracksMessenger.subscribe(topic, spyOnSubscribe, { qos: 1 });
+  });
+});
+
+describe('end', function() {
+  var barracksMessenger;
+  var BarracksMessenger;
+  var mockStream = new Stream();
+  var connection = new Connection(mockStream);
+  var Mqtt = require('mqtt');
+  Mqtt.connect = sinon.stub().returns(connection);
+
+  beforeEach(function() {
+    mockStream = new Stream();
+    connection = new Connection(mockStream);
+    Mqtt = require('mqtt');
+    Mqtt.connect = sinon.stub().returns(connection);
+
+    BarracksMessenger = proxyquire('../src/index.js', {
+      'mqtt-connection': connection
+    });
+
+    barracksMessenger = new BarracksMessenger.BarracksMessenger({
+      apiKey: 'apiKey',
+      unitId: 'unitId'
+    });
+  });
+
+  it('should close the connection', function(done) {
+    // Given
+    setTimeout(function() {
+      barracksMessenger.end();
+      done();
+    }, 100);
+
+    // When / Then
+    barracksMessenger.connect({
+      onConnect: function(){},
+      onError: function(){},
+      onClose: function(){},
+      onReconnect: function(){}
+    });
+
+  });
+});
+
