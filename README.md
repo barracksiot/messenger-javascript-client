@@ -22,7 +22,7 @@ var barracksMessenger = new BarracksMessenger({
 ```
 Your user API key you can be found on the Account page of the [Barracks application](https://app.barracks.io/).
 
-### Connect to the messenging service :
+### Connect to the messaging service :
 ```js
 barracksMessenger.connect({
     onConnect: function() {
