@@ -24,6 +24,13 @@ if (!barracksApiKey) {
   process.exit();
 }
 
+if (!barracksUnitId) {
+  console.log('Argument --unitId <UNIT_ID> is mandatory.');
+  console.log('<UNIT_ID> is your device\'s id');
+  console.log('You can also use the arguments --baseUrl <BARRACKS_URL> and --MqttEndpoint <MQTT_ENDPOINT> if you want to request another domain than the default one.');
+  process.exit();
+}
+
 var barracksMessenger = new BarracksMessenger({
   baseURL: barracksBaseUrl,
   mqttEndpoint: barracksMqttEndpoint,
