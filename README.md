@@ -2,13 +2,15 @@
 
 The Javascript SDK to enable messaging on your devices
 
-##Installation
+## Installation
+
 ```bash
 $ npm install barracks-messenger-sdk-betatest
 ```
 
-##Usage
-###Create a Barracks Messaging SDK instance
+## Usage
+
+### Create a Barracks Messaging SDK instance
 
 ```js
 var BarracksMessenger = require('../src/index').BarracksMessenger;
