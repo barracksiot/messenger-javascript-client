@@ -10,7 +10,7 @@ $ npm install barracks-messenger-sdk-betatest
 
 ## Usage
 
-### Create a Barracks Messaging SDK instance
+### Create a Barracks Messaging SDK instance :
 
 ```js
 var BarracksMessenger = require('../src/index').BarracksMessenger;
@@ -22,7 +22,7 @@ var barracksMessenger = new BarracksMessenger({
 ```
 Your user API key you can be found on the Account page of the [Barracks application](https://app.barracks.io/).
 
-### Connect to the messenging service
+### Connect to the messenging service :
 ```js
 barracksMessenger.connect({
     onConnect: function() {
@@ -40,7 +40,7 @@ barracksMessenger.connect({
 });
 ```
 
-### Subscribe to a topic to enable message reception
+### Subscribe to a topic to enable message reception :
 ```js
 barracksMessenger.subscribe(topic, function(messageReceived) {
     // Do something with a message when you retrieve it
@@ -54,7 +54,7 @@ A message object has 5 properties :
 * length   : int
 * qos      : 0 or 1 (2 is not supported yet)
 
-### End the connection
+### End the connection :
 
 ```js
 barracksMessenger.end();
