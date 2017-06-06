@@ -40,7 +40,7 @@ BarracksMessenger.prototype.connect = function(options) {
 };
 
 BarracksMessenger.prototype.subscribe = function(topic, callback, options) {
-  client.subscribe(this.options.apiKey + '.' + this.options.unitId, { qos: options.qos });
+  client.subscribe(topic, { qos: options.qos });
   client.on('message', function(topic, message, packet) {
     var messageReceived = new Message(message.toString(), packet.retain, packet.topic, packet.length, packet.qos);
     callback(messageReceived);
