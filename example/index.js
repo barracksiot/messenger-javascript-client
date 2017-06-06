@@ -15,6 +15,7 @@ process.argv.forEach(function (val, index) {
 var barracksBaseUrl = args.baseUrl;
 var barracksMqttEndpoint = args.MqttEndpoint;
 var barracksApiKey = args.apiKey;
+var barracksUnitId = args.unitId;
 
 if (!barracksApiKey) {
   console.log('Argument --apiKey <API_KEY> is mandatory.');
@@ -26,7 +27,7 @@ if (!barracksApiKey) {
 var barracksMessenger = new BarracksMessenger({
   baseURL: barracksBaseUrl,
   mqttEndpoint: barracksMqttEndpoint,
-  unitId: 'Patrick',
+  unitId: barracksUnitId,
   apiKey: barracksApiKey
 });
 
