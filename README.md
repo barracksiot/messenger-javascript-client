@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/barracksiot/messenger-javascript-client.svg?branch=BO-1117)](https://travis-ci.org/barracksiot/messenger-javascript-client) [![Coverage Status](https://coveralls.io/repos/github/barracksiot/messenger-javascript-client/badge.svg?branch=BO-1117)](https://coveralls.io/github/barracksiot/javascript-client?branch=master)
+[![Build Status](https://travis-ci.org/barracksiot/messenger-javascript-client.svg?branch=BO-1117)](https://travis-ci.org/barracksiot/messenger-javascript-client) [![Coverage Status](https://coveralls.io/repos/github/barracksiot/messenger-javascript-client/badge.svg?branch=BO-1117)](https://coveralls.io/github/barracksiot/messenger-javascript-client?branch=master)
 
 # Barracks Messaging SDK for Javascript (Beta)
 
