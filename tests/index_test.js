@@ -249,7 +249,7 @@ describe('subscribe', function() {
       connection.emit('connect');
     }, 50);
 
-    setTimeout(function() {
+    setTim(function() {
       connection.emit('message', topic, message, packet);
       expect(spyOnSubscribe).to.have.been.calledOnce;
       expect(spyOnSubscribe).to.have.been.calledWithExactly(messageReceived);
