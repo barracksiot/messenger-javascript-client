@@ -41,7 +41,7 @@ var barracksMessenger = new BarracksMessenger({
 function listenMessages() {
   barracksMessenger.connect({
     onConnect: function() {
-      console.log('Connected to ' + barracksMessenger.options.mqttEndpoint);
+      console.log('Connected to ' + barracksMqttEndpoint);
     },
     onError: function(err) {
       console.log('Error occurred : ' + err);
@@ -54,7 +54,7 @@ function listenMessages() {
     }
   });
 
-  barracksMessenger.subscribe(barracksMessenger.options.apiKey + '.' + barracksMessenger.options.unitId, function(messageReceived) {
+  barracksMessenger.subscribe(barracksApiKey + '.' + barracksUnitId, function(messageReceived) {
     console.log('Received: ' + messageReceived.payload);
     console.log('retain : ' + messageReceived.retained + ' // topic : ' + messageReceived.topic);
     console.log('length: ' + messageReceived.length);
