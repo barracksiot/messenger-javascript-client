@@ -1,6 +1,6 @@
 {
   "name": "barracks-messenger-sdk-betatest",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "build": 0,
   "description": "Barracks messaging SDK node module",
   "main": "src/index.js",

@@ -42,7 +42,7 @@ BarracksMessenger.prototype.connect = function(options) {
 BarracksMessenger.prototype.subscribe = function(topic, callback, options) {
   client.subscribe(topic, { qos: options.qos });
   client.on('message', function(topic, message, packet) {
-    var messageReceived = new Message(message.toString(), packet.retain, packet.topic, packet.length, packet.qos);
+    var messageReceived = new Message(message, packet.retain, packet.topic, packet.length, packet.qos);
     callback(messageReceived);
   });
 };
