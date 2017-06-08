@@ -27,7 +27,7 @@ function Message(payload, retained, topic, length, qos) {
   this.qos = qos;
 };
 
-BarracksMessenger.prototype.connect = function(options) {
+BarracksMessenger.prototype.connect = function (options) {
   client = mqtt.connect(this.options.mqttEndpoint, {
     clientId: this.options.apiKey + '.' + this.options.unitId,
     clean: false
@@ -39,15 +39,15 @@ BarracksMessenger.prototype.connect = function(options) {
   client.on('reconnect', options.onReconnect);
 };
 
-BarracksMessenger.prototype.subscribe = function(topic, callback, options) {
+BarracksMessenger.prototype.subscribe = function (topic, callback, options) {
   client.subscribe(topic, { qos: options.qos });
-  client.on('message', function(topic, message, packet) {
+  client.on('message', function (topic, message, packet) {
     var messageReceived = new Message(message, packet.retain, packet.topic, packet.length, packet.qos);
     callback(messageReceived);
   });
 };
 
-BarracksMessenger.prototype.end = function() {
+BarracksMessenger.prototype.end = function () {
   client.end();
   console.log('Disconnected from server');
 };

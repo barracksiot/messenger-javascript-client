@@ -7,7 +7,7 @@ The Javascript SDK to enable messaging on your devices
 ## Installation
 
 ```bash
-$ npm install barracks-messenger-sdk-betatest
+$ npm install barracks-messenger-sdk
 ```
 
 ## Usage
@@ -54,7 +54,7 @@ A message object has 5 properties :
 * retained : boolean
 * topic    : String
 * length   : int
-* qos      : 0 or 1 (2 is not supported yet)
+* qos      : 0 or 1
 
 ### End the connection :
 
