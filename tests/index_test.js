@@ -49,7 +49,7 @@ describe('Constructor : ', function () {
     var barracksMessenger = new BarracksMessenger(options);
 
     // Then
-    validateBarracksMessengerObject(barracksMessenger, 'https://app.barracks.io', 'mqtt://app.barracks.io');
+    validateBarracksMessengerObject(barracksMessenger, 'https://app.barracks.io', 'mqtt://mqtt.barracks.io');
   });
 
   it('Should return the BarracksMessenger object with baseUrl overriden when url option given', function() {
@@ -65,7 +65,7 @@ describe('Constructor : ', function () {
     var barracksMessenger = new BarracksMessenger(options);
 
     // Then
-    validateBarracksMessengerObject(barracksMessenger, url, 'mqtt://app.barracks.io');
+    validateBarracksMessengerObject(barracksMessenger, url, 'mqtt://mqtt.barracks.io');
   });
 
   it('Should return the BarracksMessenger object with mqttEndpoint overriden when mqtt option given', function() {
@@ -120,13 +120,6 @@ describe('connect', function() {
     spyOnError = sinon.spy();
     spyOnReconnect = sinon.spy();
 
-    setTimeout(function() {
-      connection.emit('connect');
-    }, 50);
-    setTimeout(function() {
-      connection.emit('close');
-    }, 150);
-
     // When / Then
     barracksMessenger.connect({
       onConnect: spyOnConnect,
@@ -140,6 +133,9 @@ describe('connect', function() {
       },
       onReconnect: spyOnReconnect
     });
+
+    connection.emit('connect');
+    connection.emit('close');
   });
 
   it('should go into error code if error triggered', function(done) {
@@ -149,13 +145,6 @@ describe('connect', function() {
     spyOnReconnect = sinon.spy();
 
     var error = 'an error';
-    setTimeout(function() {
-      connection.emit('connect');
-    }, 50);
-
-    setTimeout(function() {
-      connection.emit('error', error);
-    }, 150);
 
     // When / Then
     barracksMessenger.connect({
@@ -170,6 +159,9 @@ describe('connect', function() {
       onClose: spyOnClose,
       onReconnect: spyOnReconnect
     });
+
+    connection.emit('connect');
+    connection.emit('error', error);
   });
 
   it('should attempt to reconnect if reconnect event triggered', function(done) {
@@ -177,14 +169,6 @@ describe('connect', function() {
     spyOnConnect = sinon.spy();
     spyOnError = sinon.spy();
     spyOnClose = sinon.spy();
-
-    setTimeout(function() {
-      connection.emit('connect');
-    }, 50);
-
-    setTimeout(function() {
-      connection.emit('reconnect');
-    }, 150);
 
     // When / Then
     barracksMessenger.connect({
@@ -199,6 +183,9 @@ describe('connect', function() {
         done();
       }
     });
+
+    connection.emit('connect');
+    connection.emit('reconnect');
   });
 });
 
@@ -253,18 +240,6 @@ describe('subscribe', function () {
     var packet = Packet.generate(object);
     var messageReceived = new Message(message.toString(), packet.retain, packet.topic, packet.length, packet.qos);
 
-    setTimeout(function () {
-      connection.emit('connect');
-    }, 50);
-
-    setTimeout(function () {
-      connection.emit('message', topic, message, packet);
-    }, 100);
-
-    setTimeout(function () {
-      connection.emit('close');
-    }, 200);
-
     connection.subscribe = sinon.stub().returns(true);
 
     // When / Then
@@ -283,6 +258,10 @@ describe('subscribe', function () {
     });
 
     barracksMessenger.subscribe(topic, spyOnSubscribe, { qos: 1 });
+
+    connection.emit('connect');
+    connection.emit('message', topic, message, packet);
+    connection.emit('close');
   });
 });
 
@@ -318,23 +297,7 @@ describe('end', function () {
     var spyOnReconnect = sinon.spy();
     var spyOnEnd = sinon.spy();
 
-    setTimeout(function () {
-      connection.emit('connect');
-    }, 50);
-
     connection.end = spyOnEnd;
-
-    setTimeout(function () {
-      barracksMessenger.end();
-      expect(spyOnEnd).to.have.been.calledOnce;
-      expect(spyOnEnd).to.have.been.calledWithExactly();
-      expect(spyOnConnect).to.have.been.calledOnce;
-      expect(spyOnConnect).to.have.been.calledWithExactly();
-      expect(spyOnError).to.not.have.been.calledOnce;
-      expect(spyOnReconnect).to.not.have.been.calledOnce;
-      expect(spyOnClose).to.not.have.been.calledOnce;
-      done();
-    }, 300);
 
     // When / Then
     barracksMessenger.connect({
@@ -343,6 +306,17 @@ describe('end', function () {
       onClose: spyOnClose,
       onReconnect: spyOnReconnect
     });
+
+    connection.emit('connect');
+    barracksMessenger.end();
+    expect(spyOnEnd).to.have.been.calledOnce;
+    expect(spyOnEnd).to.have.been.calledWithExactly();
+    expect(spyOnConnect).to.have.been.calledOnce;
+    expect(spyOnConnect).to.have.been.calledWithExactly();
+    expect(spyOnError).to.not.have.been.calledOnce;
+    expect(spyOnReconnect).to.not.have.been.calledOnce;
+    expect(spyOnClose).to.not.have.been.calledOnce;
+    done();
   });
 });
 
