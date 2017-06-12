@@ -57,7 +57,7 @@ function listenMessages() {
     }
   });
 
-  barracksMessenger.subscribe(barracksApiKey + '.' + barracksUnitId, function (messageReceived) {
+  barracksMessenger.subscribe(function (messageReceived) {
     console.log('Received: ' + messageReceived.payload);
     console.log('retain : ' + messageReceived.retained);
     console.log('topic : ' + messageReceived.topic);
