@@ -46,7 +46,7 @@ barracksMessenger.connect({
 
 ### Subscribe to a topic to enable message reception :
 ```js
-barracksMessenger.subscribe(topic, function(messageReceived) {
+barracksMessenger.subscribe(function (messageReceived) {
     // Do something with a message when you retrieve it
 }, { qos: 1 });
 ```
