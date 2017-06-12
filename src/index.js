@@ -1,7 +1,7 @@
 'use strict';
 
 var DEFAULT_BARRACKS_BASE_URL         = 'https://app.barracks.io';
-var DEFAULT_BARRACKS_MQTT_ENDPOINT    = 'mqtt://app.barracks.io';
+var DEFAULT_BARRACKS_MQTT_ENDPOINT    = 'mqtt://mqtt.barracks.io';
 
 require('es6-promise').polyfill();
 var fs = require('fs');
@@ -13,7 +13,7 @@ var client;
 function BarracksMessenger(options) {
   this.options = {
     baseURL: options.baseURL || DEFAULT_BARRACKS_BASE_URL,
-    mqttEndpoint: options.mqttEndpoint || DEFAULT_BARRACKS_MQTT_ENDPOINT,
+    mqttEndpoint: options.mqttEndpoint ||DEFAULT_BARRACKS_MQTT_ENDPOINT,
     unitId: options.unitId,
     apiKey: options.apiKey
   };
