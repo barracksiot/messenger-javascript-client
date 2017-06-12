@@ -29,7 +29,7 @@ function Message(payload, retained, topic, length, qos) {
 
 BarracksMessenger.prototype.connect = function (options) {
   client = mqtt.connect(this.options.mqttEndpoint, {
-    clientId: this.options.apiKey + '.' + this.options.unitId,
+    clientId: this.options.apiKey + '/' + this.options.unitId,
     clean: false
   });
 
@@ -39,9 +39,9 @@ BarracksMessenger.prototype.connect = function (options) {
   client.on('reconnect', options.onReconnect);
 };
 
-BarracksMessenger.prototype.subscribe = function (topic, callback, options) {
-  client.subscribe(topic, { qos: options.qos });
-  client.on('message', function (topic, message, packet) {
+BarracksMessenger.prototype.subscribe = function (callback, options) {
+  client.subscribe(this.options.apiKey + '/' + this.options.unitId, { qos: options.qos });
+  client.on('message', function (message, packet) {
     var messageReceived = new Message(message, packet.retain, packet.topic, packet.length, packet.qos);
     callback(messageReceived);
   });

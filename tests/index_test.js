@@ -224,7 +224,7 @@ describe('subscribe', function () {
     spyOnConnect = sinon.spy();
     spyOnError = sinon.spy();
     spyOnReconnect = sinon.spy();
-    var topic = barracksMessenger.options.apiKey + '.' + barracksMessenger.options.unitId;
+    var topic = barracksMessenger.options.apiKey + '/' + barracksMessenger.options.unitId;
     var message = 'Salut';
     var object = {
       cmd: 'publish',
@@ -257,10 +257,10 @@ describe('subscribe', function () {
       onReconnect: spyOnReconnect
     });
 
-    barracksMessenger.subscribe(topic, spyOnSubscribe, { qos: 1 });
+    barracksMessenger.subscribe(spyOnSubscribe, { qos: 1 });
 
     connection.emit('connect');
-    connection.emit('message', topic, message, packet);
+    connection.emit('message', message, packet);
     connection.emit('close');
   });
 });
