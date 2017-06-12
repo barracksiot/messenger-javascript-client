@@ -260,7 +260,7 @@ describe('subscribe', function () {
     barracksMessenger.subscribe(spyOnSubscribe, { qos: 1 });
 
     connection.emit('connect');
-    connection.emit('message', message, packet);
+    connection.emit('message', topic, message, packet);
     connection.emit('close');
   });
 });
