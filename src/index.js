@@ -10,7 +10,7 @@ var mqtt = require('mqtt');
 var uuid = require('uuid/v1');
 var client;
 
-function BarracksMessenger(options) {
+function BarracksMessenger( options) {
   this.options = {
     baseURL: options.baseURL || DEFAULT_BARRACKS_BASE_URL,
     mqttEndpoint: options.mqttEndpoint ||DEFAULT_BARRACKS_MQTT_ENDPOINT,
@@ -29,7 +29,7 @@ function Message(payload, retained, topic, length, qos) {
 
 BarracksMessenger.prototype.connect = function (options) {
   client = mqtt.connect(this.options.mqttEndpoint, {
-    clientId: this.options.apiKey + '/' + this.options.unitId,
+    clientId: this.options.apiKey + '.' + this.options.unitId,
     clean: false
   });
 
@@ -41,7 +41,7 @@ BarracksMessenger.prototype.connect = function (options) {
 
 BarracksMessenger.prototype.subscribe = function (callback, options) {
   client.subscribe(this.options.apiKey + '/' + this.options.unitId, { qos: options.qos });
-  client.on('message', function (message, packet) {
+  client.on('message', function (topic, message, packet) {
     var messageReceived = new Message(message, packet.retain, packet.topic, packet.length, packet.qos);
     callback(messageReceived);
   });
