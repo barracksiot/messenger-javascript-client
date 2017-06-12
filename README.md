@@ -1,4 +1,6 @@
-[![Build Status](https://travis-ci.org/barracksiot/messenger-javascript-client.svg?branch=master)](https://travis-ci.org/barracksiot/messenger-javascript-client) [![Coverage Status](https://coveralls.io/repos/github/barracksiot/messenger-javascript-client/badge.svg?branch=master)][(https://coveralls.io/github/barracksiot/messenger-javascript-client?branch=master)(https://badge.fury.io/js/barracks-messenger-sdk.svg)](https://badge.fury.io/js/barracks-messenger-sdk)
+[![Build Status](https://travis-ci.org/barracksiot/messenger-javascript-client.svg?branch=master)](https://travis-ci.org/barracksiot/messenger-javascript-client) 
+[![Coverage Status](https://coveralls.io/repos/github/barracksiot/messenger-javascript-client/badge.svg?branch=master)](https://coveralls.io/github/barracksiot/messenger-javascript-client?branch=master)
+[![npm version](https://badge.fury.io/js/barracks-messenger-sdk.svg)](https://badge.fury.io/js/barracks-messenger-sdk)
 
 # Barracks Messaging SDK for Javascript (Beta)
 
